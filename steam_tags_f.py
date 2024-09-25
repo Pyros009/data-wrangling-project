@@ -147,8 +147,5 @@ def add_mp(df, mp_dict):
             else:
                 # If column[2] is empty, just set it to the multiplayer info
                 df2.at[index, df2.columns[2]] = ', '.join(mp)
-        else:
-            # If there's no multiplayer info, keep "Not Found"
-            df2.at[index, df.columns[2]] = "Not Found"
-    
+
     return df2
