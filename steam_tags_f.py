@@ -181,12 +181,12 @@ def fetch_dict(soup, gameid):
         # Date
         date = play[i]
         # Peak players
-        peak = play[i+1]  
+        average = play[i+1]  
         # Average players
-        average = play[i +4]
+        peak = play[i +4]
         player_game[k_value]={"Date": date,
-                            "Peak Players":peak,
                             "Avg Players":average,
+                            "Peak Players":peak,
         }
         
         k_value += 1
