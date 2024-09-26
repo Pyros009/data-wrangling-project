@@ -149,3 +149,76 @@ def add_mp(df, mp_dict):
                 df2.at[index, df2.columns[2]] = ', '.join(mp)
 
     return df2
+
+def get_url(url, headers=None, params=None, type="ws"):
+    """
+    Args:
+        url (str): pass on url
+        type (str): define "ws" (webscrapping) or "api" (for API/json output), default is ws
+        headers (str, optional): Defaults to None.
+        params (dict, optional): Defaults to None.
+
+    Returns:
+        stat , response: outputs stat code and response content, either soup or json type.
+    """
+    response = requests.get(url,headers=headers, params=params)
+    stat = response.status_code
+    if type.lower() == "ws":
+        soup = BeautifulSoup(response.content, 'html.parser')
+    elif type.lower() == "api":
+        soup = response.json()
+    time.sleep(1)
+    
+    return stat, soup
+
+def fetch_dict(soup, gameid):
+    k_value = 0
+    players = soup.find("tbody")
+    play = re.split(r"[\n\t]+",players.get_text().strip())
+    player_game = {} 
+
+    for i in range(0, len(play), 5):
+        # Date
+        date = play[i]
+        # Peak players
+        peak = play[i+1]  
+        # Average players
+        average = play[i +4]
+        player_game[k_value]={"Date": date,
+                            "Peak Players":peak,
+                            "Avg Players":average,
+        }
+        
+        k_value += 1
+        
+    return player_game
+
+def overall_fetch(list_id):
+    error_list =[]
+    game_id_dict = {}
+    for gameid in list_id:
+        gameid = str(gameid)
+        url = f'https://steamcharts.com/app/{gameid}'
+        headers= {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'}
+        try:
+            stat, soup = get_url(url, headers=headers, params=gameid)
+            if stat == 200:
+                print(f"Webcode status is : {stat} for {gameid} id. ")
+                player_game = fetch_dict(soup, gameid)
+                game_id_dict[gameid] = player_game.copy()
+            else:
+                error_list.append((gameid, stat))
+                print(f"Appid: {gameid} reported an error {stat}, skipping it for now")    
+        except Exception as e:  # Catch specific exceptions
+            error_list.append((gameid, stat))
+            print(f"App ID: {gameid} reported an error: {str(e)}, skipping it for now.")
+            
+    
+    return game_id_dict, error_list
+
+def add_tags_df (df, dict):
+    df2 = df.copy()
+    for col in df2.columns:
+        if col in dict.keys():
+            df2.at[0, col] = dict[col]
+    return df2
