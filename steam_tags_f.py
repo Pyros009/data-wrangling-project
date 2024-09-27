@@ -1,13 +1,11 @@
-import aiohttp
-import http
+import aiohttp, http, asyncio, requests, re, time, os, json, pickle, functools, random
 from bs4 import BeautifulSoup
-import asyncio
-import requests
 import pandas as pd
-import re, time
-import pickle
-import json
+import seaborn as sns
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 import steam_tags_f as stf
+from dotenv import load_dotenv
 
 
 def add_appid (df, dict):
@@ -222,3 +220,86 @@ def add_tags_df (df, dict):
         if col in dict.keys():
             df2.at[0, col] = dict[col]
     return df2
+
+# Graphic Display
+
+def t_plot(df, lines,llegend,yx):
+    # Set theme and palette
+    sns.set_theme(style="darkgrid")
+    sns.set_palette("viridis")
+
+    # plots lines
+    plt.figure(figsize=(12, 6))  # Adjust figure size
+
+    for l in lines:
+        colors = sns.color_palette("colorblind", 10)
+        coloration = random.randint(0,9)
+        sns.lineplot(data=df[1:], x=df.index[1:], y=l, marker='o', linestyle='--', linewidth=2, label=l, color=colors[coloration])
+
+    legend = plt.legend(title=llegend, loc='upper left', bbox_to_anchor=(1, 1))
+    plt.xlabel('Index')
+    plt.ylabel('Values')
+    
+    # Covid related lines
+    plt.axvline(x="November 2019", color='orange', linestyle='--', linewidth=1)
+    plt.axvline(x="January 2020", color='red', linestyle='--', linewidth=1)
+    plt.axvline(x="June 2020", color='green', linestyle='--', linewidth=1)
+    plt.axvline(x="November 2020", color='orange', linestyle='--', linewidth=1)
+    plt.axvline(x="November 2021", color='green', linestyle='--', linewidth=1)
+    if yx == "y":
+        coord = 500000
+        plt.text(x="November 2019", y = coord, s='Nov19: China warns about Covid', color='orange', fontsize=10, ha='right', rotation=90)
+        plt.text(x="January 2020",  y = coord, s='Jan20: WHO acknoledges Covid', color='red', fontsize=10, ha='right', rotation=90)
+        plt.text(x="June 2020",  y = coord, s='Jun20: End of first big lockdown period', color='green', fontsize=10, ha='right', rotation=90)
+        plt.text(x="November 2020",  y = coord, s='Nov20: Second Wave', color='orange', fontsize=10, ha='right', rotation=90)
+        plt.text(x="November 2021",  y = coord, s='Nov21: Fourth Wave', color='green', fontsize=10, ha='right', rotation=90)
+        
+    # Game related lines
+    #plt.axvline(x="December 2017", color='cyan', linestyle='--', linewidth=1)
+    #plt.axvline(x="December 2020", color='cyan', linestyle='--', linewidth=1)
+    #plt.axvline(x="September 2021", color='cyan', linestyle='--', linewidth=1)
+    #plt.axvline(x="February 2021", color='cyan', linestyle='--', linewidth=1)
+    #plt.axvline(x="March 2019", color='cyan', linestyle='--', linewidth=1)
+
+
+    #plt.text(x="December 2017", y=coord, s="PUBG goes live", color='cyan', fontsize=10, ha='right', rotation=90)
+    #plt.text(x="December 2020", y=coord, s="Cyberpunk goes live", color='cyan', fontsize=10, ha='right', rotation=90)
+    #plt.text(x="September 2021", y=coord, s="New World goes live", color='cyan', fontsize=10, ha='right', rotation=90)
+    #plt.text(x="February 2021", y=coord, s="Valheim goes live", color='cyan', fontsize=10, ha='right', rotation=90)
+    #plt.text(x="March 2019", y=coord, s="Sekiro goes live", color='cyan', fontsize=10, ha='right', rotation=90)
+
+
+    ### Graphic formatting
+    dates = df[1:].index
+    tick_interval = 3
+    tick_indices = range(0, len(dates), tick_interval)
+
+    # Format the date on the x-axis
+    plt.xticks(tick_indices, dates[tick_indices], rotation=45, ha="right")
+
+    #Limit x-axis onto a specific interval 
+    plt.xlim('August 2022', 'August 2018')  # Specify the limits as strings
+    plt.gca().invert_xaxis() # inverts the x-axis (more suited for dates as it grows from left to right)
+
+    # Set titles and labels
+    plt.title(llegend)
+    plt.xlabel('Date')
+    plt.ylabel('Average players per type')
+
+# Z Normalization definition
+
+def z_norm(column):
+    mean = column.mean()
+    std_dev = column.std()
+    return (column - mean) / std_dev
+
+# creates a dataframe of a specific genre with a single column that contains the specified value 
+def make_type(df, substring):
+    df2 = df.copy()
+    columns_to_keep = df2.columns[df2.iloc[0].astype(str).str.strip().str.contains(substring)]
+    output = df2[columns_to_keep]
+    output[substring]=0
+    output.loc[output.index[1:], substring] = output.iloc[1:, :].sum(axis=1)
+    output = output.filter(like=substring, axis=1)
+       
+    return output 
