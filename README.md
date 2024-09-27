@@ -9,18 +9,18 @@ Games were then one of the solutions to hang-out with friends. Steam is one of t
 we aim to provide some insights on our ideas.
 
 Data Sources:
-In order to do this, we aimed to try and get data from SteamAPI (http://store.steampowered.com/api/) but unfortunatelly they lacked historical background. They do however contain the required tags we needed to check for the game's genre together with some other informations (appids, etc).
+In order to do this, we aimed to try and get data from SteamAPI [http://store.steampowered.com/api/] but unfortunatelly they lacked historical background. They do however contain the required tags we needed to check for the game's genre together with some other informations (appids, etc).
 
-We aimed to use webscrapping on SteamDB's website (https://steamdb.info/) to fetch the historical data, but the website proved uncooperative to webscrapping. It was however, a good source to manually grab the information and storing into a basic dataframe to narrow our field of search, since Steam holds more than 280.000 games/objects. As such, we grabbed the top 1.000 all-time peak activity games using SteamDB's ranking at (https://steamdb.info/charts/).
+We aimed to use webscrapping on SteamDB's website [https://steamdb.info/] to fetch the historical data, but the website proved uncooperative to webscrapping. It was however, a good source to manually grab the information and storing into a basic dataframe to narrow our field of search, since Steam holds more than 280.000 games/objects. As such, we grabbed the top 1.000 all-time peak activity games using SteamDB's ranking at [https://steamdb.info/charts/].
 
-To grab historical background, we relied on SteamCharts (https://steamcharts.com/app/) which proven much more webscrapping-friendly.
+To grab historical background, we relied on SteamCharts [https://steamcharts.com/app/] which proven much more webscrapping-friendly.
 
 Hypothesis and methodology: 
 1. People were playing more video games during the pandemics.
 We cleaned our assembled dataframe from games that were too recent to be insightful during pandemics. 
 To get insights on this hypothesis, we compared Total players (so the sum of players on all games) on the COVID's timeframe (August 2018 - August 2022).
 
-Plotting the information, it's clearly seen spikes during/after lockdown/heavy restriction phases.
+<--Observing the plot output, it's showing notorious peaks during lockdown/heavy restriction phases.-->
 
 
 2. People turned into Multiplayer and Co-operative (Co-op) games to gap the lack of socialization
