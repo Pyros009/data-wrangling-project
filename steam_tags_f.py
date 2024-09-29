@@ -9,6 +9,16 @@ from dotenv import load_dotenv
 
 
 def add_appid (df, dict):
+    """
+    Takes a dataframe and merges with the dictionary containing appids. 
+
+    Args:
+        df (dataframe): dataframe contains game title at row 0
+        dict (dictionary): dictionary contains game title at row 0 and appid at row 1
+
+    Returns:
+        dataframe with the merged information, or "Not Found" in case of game title mismatches
+    """
     df2 = df.copy()
     for index, row in df2.iterrows():
         title = row[0]  
@@ -20,23 +30,16 @@ def add_appid (df, dict):
     return df2
 
 
-def check_multiplayer_single(game_id):
-    response = requests.get(f"http://store.steampowered.com/api/appdetails?appids={game_id}")
-    game = response.json()
-    categories = game[game_id]["data"]["categories"]
-    mp_list = []
-    mp_dict= {}
-    # Check if "Multi-player" is in the categories
-    for category in categories:
-        if category["description"] == "Multi-player":
-            mp_list.append("Multi-player")
-        elif category["description"] == "Co-op":
-            mp_list.append("Co-op")
-    mp_dict[game_id] = mp_list
-    return mp_dict
-
-
 def get_tags(app_id_list, delay=1):
+    """
+    From the appid, using steamAPI returns the game genres for that game's appid.
+
+    Args:
+        appid (string)
+        
+    Returns:
+        dictionary with appid as key and game genres as a list
+    """
     tag_dict = {}
     
     for appid in app_id_list:
@@ -91,6 +94,18 @@ def add_tags_df (df, dict):
 
 
 def check_multiplayer(app_id_list, api_key, delay=1):
+    """
+    Using steamAPI, with a list of appids, returns the game genres
+
+    Args:
+        app_id_list (list)
+        api_key (string)
+        delay (int): optional
+        
+    Returns:
+        dictionary with appid as key and game genres as a list
+    """
+    
     mp_dict = {}
     
     for appid in app_id_list:
@@ -177,6 +192,15 @@ def get_url(url, headers=None, params=None, type="ws"):
     return stat, soup
 
 def fetch_dict(soup, gameid):
+    """
+    Args:
+        soup (bs4 soup): soup from get_url
+        gameid (string): string of appid to fetch information from
+
+    Returns:
+        dictionary with an int as key and values is a dictionary with information as key, value pairs
+    """
+    
     k_value = 0
     players = soup.find("tbody")
     play = re.split(r"[\n\t]+",players.get_text().strip())
@@ -199,6 +223,17 @@ def fetch_dict(soup, gameid):
     return player_game
 
 def overall_fetch(list_id):
+    """
+    Main function to run get_url and fetch dict by order
+    Args:
+        gameid (string): string of appid to fetch information from
+
+    Returns:
+        tuple containing:
+            dictionary with game's info (Date, Avg Players, Peak Players)
+            list containing the gameid that returned an error, and the error code (200 if it was an exception, other codes related to lack of info).
+    """    
+    
     error_list =[]
     game_id_dict = {}
     for gameid in list_id:
@@ -226,6 +261,17 @@ def overall_fetch(list_id):
 # Graphic Display
 
 def t_plot(df, lines,llegend,yx):
+    """
+    Main plotting function, creates the lineplots.
+    
+    Args:
+        df (dataframe) : the dataframe for all the values being plotted
+        lines (list) : list of all the information we want to plot
+        llegend (string) : title for the legend and the graphic
+        yx (string) : "y" as yes to display the extra line's info, otherwise nothing appears
+
+    """
+    
     # Set theme and palette
     sns.set_theme(style="darkgrid")
     sns.set_palette("viridis")
@@ -291,12 +337,33 @@ def t_plot(df, lines,llegend,yx):
 # Z Normalization definition
 
 def z_norm(column):
+    """
+    simple Z-normalization operation
+
+    Args:
+        column (series): data series to be normalized
+
+    Returns:
+        series: normalized value
+    """
+    
     mean = column.mean()
     std_dev = column.std()
     return (column - mean) / std_dev
 
-# creates a dataframe of a specific genre with a single column that contains the specified value 
 def make_type(df, substring):
+    """
+    creates a dataframe of a specific genre with a single column that contains the specified value 
+
+    Args:
+        df (dataframe) : source dataframe
+        substring (string): name of the column to be normalized
+
+    Returns:
+        dataframe removing all data but the specific substring
+    """  
+    
+    
     df2 = df.copy()
     columns_to_keep = df2.columns[df2.iloc[0].astype(str).str.strip().str.contains(substring)]
     output = df2[columns_to_keep]
