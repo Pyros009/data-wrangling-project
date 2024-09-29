@@ -82,6 +82,13 @@ def add_tags(df, tag_dict):
     
     return df2
 
+def add_tags_df (df, dict):
+    df2 = df.copy()
+    for col in df2.columns:
+        if col in dict.keys():
+            df2.at[0, col] = dict[col]
+    return df2
+
 
 def check_multiplayer(app_id_list, api_key, delay=1):
     mp_dict = {}
@@ -214,12 +221,7 @@ def overall_fetch(list_id):
     
     return game_id_dict, error_list
 
-def add_tags_df (df, dict):
-    df2 = df.copy()
-    for col in df2.columns:
-        if col in dict.keys():
-            df2.at[0, col] = dict[col]
-    return df2
+
 
 # Graphic Display
 
